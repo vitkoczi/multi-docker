@@ -8,14 +8,14 @@ services:
   nginx:
     restart: always
     depends_on: 
-      - frontend
-      - apiserver
+      - client
+      - api
     build:
       dockerfile: Dockerfile.dev
       context: ./nginx
     ports: 
       - '3050:80'
-  apiserver:
+  api:
     depends_on: 
       - redis 
       - postgres 
@@ -37,7 +37,7 @@ services:
       - PGDATABASE=postgres
       - PGPASSWORD=postgres_password
       - PGPORT=5432
-  frontend:
+  client:
     build:
       dockerfile: Dockerfile.dev
       context: ./client
