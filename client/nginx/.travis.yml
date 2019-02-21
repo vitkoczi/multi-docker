@@ -1,0 +1,26 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+# ./client is very important as the build has to be done inside the client context
+  - docker build -t vitkoczi/react-test -f ./client/Dockerfile.dev ./client
+# here could be added more docker build to prepare the container for further tests
+  sctript:
+    - docker run vitkoczi/react-test npm test -- --coverage
+
+after_success:
+  # do production version build with prod docker filt
+  - docker build -t vitkoczi/multi-client ./client
+  - docker build -t vitkoczi/multi-nginx ./nginx
+  - docker build -t vitkoczi/multi-server ./server
+  - docker build -t vitkoczi/multi-worker ./worker
+
+  #take those images and push it to docker hub
+  # 1 log in to docker cli
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  # Take all of our images and push them to docker hub
+  - docker push vitkoczi/multi-client
+  - docker push vitkoczi/multi-nginx
+  - docker push vitkoczi/multi-server
+  - docker push vitkoczi/multi-worker
