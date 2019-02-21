@@ -1,0 +1,58 @@
+version: '3'
+services:
+  postgres: 
+    image: 'postgres:latest'
+  redis:
+    image: 'redis:latest'
+  # it has to run always even if api crashes to be able to display error msg
+  nginx:
+    restart: always
+    depends_on: 
+      - frontend
+      - apiserver
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./nginx
+    ports: 
+      - '3050:80'
+  apiserver:
+    depends_on: 
+      - redis 
+      - postgres 
+    build:
+    # do not use folder eg server/dockerfile.dev
+      dockerfile: Dockerfile.dev
+      context: ./server
+#    volumes:
+    # means inside this folder do not try to override /app/node_modules 
+#      - /app/node_modules
+    # look in the server folder and copy all stuff in case of change to the /app folder except the above mentioned one
+#      - ./server:/app
+    environment:
+      #  redisHost: process.env.REDIS_HOST, see keys.java
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - PGUSER=postgres
+      - PGHOST=postgres
+      - PGDATABASE=postgres
+      - PGPASSWORD=postgres_password
+      - PGPORT=5432
+  frontend:
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./client
+#    volumes:
+#      - /app/node_module
+#      - ./client:/app
+  worker:
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on: 
+      - redis 
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./worker
+#    volumes:
+#      - /app/node_modules
+#      - ./worker:/app
