@@ -4,14 +4,14 @@
     {
       "name": "client",
       "image": "vitkoczi/multi-client",
-      "hostname": "client",
+      "hostname": "frontend",
       "essential": false,
       "memory": 128
     },
     {
       "name": "server",
       "image": "vitkoczi/multi-server",
-      "hostname": "api",
+      "hostname": "apiserver",
       "essential": false,
       "memory": 128
     },
